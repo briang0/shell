@@ -24,6 +24,7 @@ void setCommandBuffer(char *userInput, char **outputBuffer) {
   }
 }
 
+
 // int main(){
 //   size_t bufsize = 256;
 //   char *input = (char*) malloc(sizeof(char) * 256);
