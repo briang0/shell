@@ -25,7 +25,6 @@ int main(){
     if (pid == 0){
       setCommandBuffer(inputBuffer, argumentBuffer);
       int error = execvp(argumentBuffer[0], argumentBuffer);
-      cout << error << "\n" << std::flush;
       exit(0);
     }else{
       do {
@@ -39,8 +38,11 @@ int main(){
 void printArguments(char **args){
   int i = 0;
   cout << "Arguments:\n" << std::flush;
-  while (i < PARAM_BUFF && args[i] != NULL){
+  while (i < PARAM_BUFF){
     cout << args[i] << "\n" << std::flush;
+    if (args[i] == NULL){
+      cout << "NULL\n" << std::flush;
+    }
     i++;
   }
 }

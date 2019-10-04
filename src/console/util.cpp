@@ -2,11 +2,18 @@
 #include<string.h>
 #include<stdio.h>
 #include "util.h"
+#include<vector>
 using namespace std;
 
 void setCommandBuffer(char *userInput, char **outputBuffer) {
+
+  if (strchr(userInput, ' ') == NULL) {
+    outputBuffer[0] = userInput;
+    outputBuffer[1] = NULL;
+  }
+
   int len = strlen(userInput);
-  char token[] = " ";
+  char token[] = " \n()<>|&;";
 
   char *item = strtok(userInput, token);
   int i = 0;
@@ -15,11 +22,7 @@ void setCommandBuffer(char *userInput, char **outputBuffer) {
     item = strtok(NULL, token);
     i++;
   }
-  outputBuffer[i] = NULL;
 }
-
-
-
 
 // int main(){
 //   size_t bufsize = 256;
