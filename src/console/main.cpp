@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "util.h"
+#include "console.h"
 #include<string.h>
 using namespace std;
 
@@ -13,41 +14,25 @@ using namespace std;
 void printArguments(char **);
 
 int main(){
-  char *inputBuffer = (char*) malloc(sizeof(char) * IN_BUFF * PARAM_BUFF);
-  char **argumentBuffer = (char**) malloc(sizeof(char) * IN_BUFF * PARAM_BUFF);
-  int status, wpid;
+  char *inputBuffer;
+  char **argumentBuffer;
   size_t bufsize = IN_BUFF;
-  int fd[2];
   int sig;
-  pipe(fd);
 
   while(1) {
+    inputBuffer = (char*) malloc(sizeof(char) * IN_BUFF * PARAM_BUFF);
+    argumentBuffer = (char**) malloc(sizeof(char) * IN_BUFF * PARAM_BUFF);
+
     cout << "[Console]: " << std::flush;
     getline(&inputBuffer, &bufsize, stdin);
-    int pid = fork();
-
-    if (pid == 0){
-      sig = 0;
-      setCommandBuffer(inputBuffer, argumentBuffer);
-      if (strcmp(argumentBuffer[0], (char*) "exit") == 0){
-        sig = 1;
-      }
-      write(fd[1], &sig, sizeof(sig));
-      int error = execvp(argumentBuffer[0], argumentBuffer);
-      exit(0);
-    }else{
-      do {
-        wpid = waitpid(pid, &status, WUNTRACED);
-      } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-    }
-    read(fd[0], &sig, sizeof(sig));
+    setCommandBuffer(inputBuffer, argumentBuffer);
+    executeCommand(argumentBuffer, sig);
     if (sig == 1) {
       break;
     }
-    cout << sig << "\n" << std::flush;
+    free(inputBuffer);
+    free(argumentBuffer);
   }
-  free(inputBuffer);
-  free(argumentBuffer);
   return 0;
 }
 
