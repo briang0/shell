@@ -17,6 +17,8 @@ int executeCommand(char** args, int &signal){
     signal = 0;
     if (strcmp(args[0], (char*) "exit") == 0){
       signal = 1;
+    }else if (strcmp(args[0], (char*) "clr") == 0){
+      signal = 2;
     }
     write(fd1[1], &signal, sizeof(int));
     int error = (int) execvp(args[0], args);

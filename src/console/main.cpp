@@ -29,6 +29,8 @@ int main(){
     executeCommand(argumentBuffer, sig);
     if (sig == 1) {
       break;
+    }else if (sig == 2){
+      system("clear");
     }
     free(inputBuffer);
     free(argumentBuffer);
