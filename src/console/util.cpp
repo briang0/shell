@@ -1,9 +1,12 @@
-#include<iostream>
-#include<string.h>
-#include<stdio.h>
+#include <iostream>
+#include <string.h>
+#include <stdio.h>
 #include "util.h"
-#include<vector>
+#include <vector>
+#include <unistd.h>
 using namespace std;
+
+#define DIR_BUFF 256
 
 void setCommandBuffer(char *userInput, char **outputBuffer) {
 
@@ -22,6 +25,12 @@ void setCommandBuffer(char *userInput, char **outputBuffer) {
     item = strtok(NULL, token);
     i++;
   }
+}
+
+char* getWorkingDirectory(){
+  size_t buffLim = DIR_BUFF;
+  char* directoryBuffer = (char*) malloc(sizeof(char) * DIR_BUFF);
+  return getcwd(directoryBuffer, buffLim);
 }
 
 // int main(){

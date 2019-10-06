@@ -23,7 +23,7 @@ int main(){
     inputBuffer = (char*) malloc(sizeof(char) * IN_BUFF * PARAM_BUFF);
     argumentBuffer = (char**) malloc(sizeof(char) * IN_BUFF * PARAM_BUFF);
 
-    cout << "[Console]: " << std::flush;
+    cout << "[Console: " << getWorkingDirectory() << "]$ " << std::flush;
     getline(&inputBuffer, &bufsize, stdin);
     setCommandBuffer(inputBuffer, argumentBuffer);
     executeCommand(argumentBuffer, sig);
@@ -31,6 +31,11 @@ int main(){
       break;
     }else if (sig == 2){
       system("clear");
+    }else if (sig == 3){
+      int success = chdir(argumentBuffer[1]);
+      if (success == -1){
+        cout << "Directory " << argumentBuffer[1] << " Does not exist in current path ";
+      }
     }
     free(inputBuffer);
     free(argumentBuffer);
