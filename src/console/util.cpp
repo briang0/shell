@@ -9,14 +9,13 @@ using namespace std;
 #define DIR_BUFF 256
 
 void setCommandBuffer(char *userInput, char **outputBuffer) {
-
   if (strchr(userInput, ' ') == NULL) {
     outputBuffer[0] = userInput;
     outputBuffer[1] = NULL;
   }
 
   int len = strlen(userInput);
-  char token[] = " \n()<>|&;";
+  char token[] = " \n()<>|&";
 
   char *item = strtok(userInput, token);
   int i = 0;
@@ -26,6 +25,8 @@ void setCommandBuffer(char *userInput, char **outputBuffer) {
     i++;
   }
 }
+
+
 
 char* getWorkingDirectory(){
   size_t buffLim = DIR_BUFF;

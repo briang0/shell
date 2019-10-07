@@ -6,6 +6,7 @@
 #include "util.h"
 #include "console.h"
 #include<string.h>
+#include<queue>
 using namespace std;
 
 #define IN_BUFF 256
@@ -13,11 +14,12 @@ using namespace std;
 
 void printArguments(char **);
 
-int main(){
+int main(int argc, char **argv, char **envp){
   char *inputBuffer;
   char **argumentBuffer;
   size_t bufsize = IN_BUFF;
   int sig;
+  queue<char**> commandQueue;
 
   while(1) {
     inputBuffer = (char*) malloc(sizeof(char) * IN_BUFF * PARAM_BUFF);
@@ -26,16 +28,24 @@ int main(){
     cout << "[Console: " << getWorkingDirectory() << "]$ " << std::flush;
     getline(&inputBuffer, &bufsize, stdin);
     setCommandBuffer(inputBuffer, argumentBuffer);
-    executeCommand(argumentBuffer, sig);
-    if (sig == 1) {
-      break;
-    }else if (sig == 2){
-      system("clear");
-    }else if (sig == 3){
-      int success = chdir(argumentBuffer[1]);
-      if (success == -1){
-        cout << "Directory " << argumentBuffer[1] << " Does not exist in current path ";
+    int execStatus = executeCommand(argumentBuffer, sig);
+    if (execStatus == 0){
+      if (sig == 1) {
+        break;
+      }else if (sig == 2){
+        system("clear");
+      }else if (sig == 3){
+        int success = chdir(argumentBuffer[1]);
+        if (success == -1){
+          cout << "Directory " << argumentBuffer[1] << " Does not exist in current path\n";
+        }
+      }else if (sig == 4){
+        printEnviron();
+      }else if (sig == 5){
+        stopItGetSomeHelp();
       }
+    }else{
+      cout << "Unknown command or bad arguments in: " << inputBuffer << "\n" << std::flush;
     }
     free(inputBuffer);
     free(argumentBuffer);

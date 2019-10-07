@@ -1,0 +1,10 @@
+Shell User Manual
+This shell supports basic internal commands. In addition, it also supports:
+
+cd <directory> 	: Change the current working directory.
+clr 		: Clear the screen
+environ		: List all environmental strings
+echo <comment>	: Display <comment> on the screen
+help		: Read this document
+pause		: Pause the shell until enter or return is pressed.
+quit		: exit the shell
