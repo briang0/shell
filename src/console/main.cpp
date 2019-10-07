@@ -11,23 +11,23 @@ using namespace std;
 
 #define IN_BUFF 256
 
-void printArguments(char **);
-
 int main(int argc, char **argv, char **envp){
   char *inputBuffer;
   size_t bufsize = IN_BUFF;
   int sig;
+  int paused = 0;
 
   while(1) {
     inputBuffer = (char*) malloc(sizeof(char) * IN_BUFF);
-
     cout << "[Console: " << getWorkingDirectory() << "]$ " << std::flush;
     getline(&inputBuffer, &bufsize, stdin);
     queue<char**> commandQueue = setCommandQueue(inputBuffer);
+
     while (!commandQueue.empty()){
       char** args = commandQueue.front();
       commandQueue.pop();
       int execStatus = executeCommand(args, sig);
+
       if (execStatus == 0){
         if (sig == 1) {
           free(inputBuffer);
@@ -48,6 +48,7 @@ int main(int argc, char **argv, char **envp){
         cout << "Unknown command or bad arguments in: " << inputBuffer << "\n" << std::flush;
       }
     }
+
     free(inputBuffer);
   }
   return 0;
