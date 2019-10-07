@@ -4,18 +4,22 @@
 #include "util.h"
 #include <vector>
 #include <unistd.h>
+#include <queue>
 using namespace std;
 
 #define DIR_BUFF 256
+#define IN_BUFF 256
+#define PARAM_BUFF 15
 
-void setCommandBuffer(char *userInput, char **outputBuffer) {
+char** getCommand(char *userInput) {
+  char** outputBuffer = (char**) malloc(sizeof(char) * 256);
   if (strchr(userInput, ' ') == NULL) {
     outputBuffer[0] = userInput;
     outputBuffer[1] = NULL;
   }
 
   int len = strlen(userInput);
-  char token[] = " \n()<>|&";
+  char token[] = " \n()<>|&;";
 
   char *item = strtok(userInput, token);
   int i = 0;
@@ -24,9 +28,29 @@ void setCommandBuffer(char *userInput, char **outputBuffer) {
     item = strtok(NULL, token);
     i++;
   }
+  return outputBuffer;
 }
 
+queue<char**> setCommandQueue(char* userInput){
+  queue<char**> commandQueue;
+  if (strchr(userInput, ';') == NULL) {
+    char** command = getCommand(userInput);
+    commandQueue.push(command);
+    return commandQueue;
+  }
 
+  int len = strlen(userInput);
+  char token[] = ";";
+  char* nextToken = NULL;
+
+  char *item = strtok_r(userInput, token, &nextToken);
+  while (item != NULL) {
+    char** nextCommand = getCommand(item);
+    commandQueue.push(nextCommand);
+    item = strtok_r(NULL, token, &nextToken);
+  }
+  return commandQueue;
+}
 
 char* getWorkingDirectory(){
   size_t buffLim = DIR_BUFF;
