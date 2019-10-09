@@ -6,32 +6,26 @@
 #include<string.h>
 using namespace std;
 
+int consoleState = 0;
+
 int getSignal(char**);
 
-int executeCommand(char** args, int &signal){
-  int fd1[2];
-  pipe(fd1);
+int executeCommand(char** args, int &signal, int bg){
   int pid = fork();
   int exitCode = 0;
   int status, wpid;
-  signal = 0;
-
+  signal = getSignal(args);
+  if (signal == 0){
+    return 0;
+  }
   if (pid == 0){
-    signal = getSignal(args);
-    write(fd1[1], &signal, sizeof(int));
-    if (signal != 0){
-      exit(0);
-    }
     signal = (int) execvp(args[0], args);
     exit(0);
-  }else{
+  }else if (bg == 0){
     do {
       wpid = waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
   }
-  read(fd1[0], &signal, sizeof(int));
-  close(fd1[0]);
-  close(fd1[1]);
   return exitCode;
 }
 
@@ -46,7 +40,7 @@ void printEnviron(){
 void stopItGetSomeHelp(){
   int signal = 0;
   char* command[3] = {(char*) "more", (char*) "help.txt", NULL};
-  executeCommand(command, signal);
+  executeCommand(command, signal, 0);
 }
 
 int getSignal(char** args){
@@ -61,6 +55,27 @@ int getSignal(char** args){
     signal = 4;
   }else if (strcmp(args[0], (char*) "help") == 0){
     signal = 5;
+  }else if (strcmp(args[0], (char*) "pause") == 0){
+    signal = 6;
   }
   return signal;
+}
+
+void clear(){
+  system("clear");
+}
+
+void changeDirectory(char* path){
+  int success = chdir(path);
+  if (success == -1){
+    cout << "Directory " << path << " Does not exist in current path\n";
+  }
+}
+
+int getConsoleState(){
+  return consoleState;
+}
+
+void setConsoleState(int state){
+  consoleState = state;
 }

@@ -19,7 +19,7 @@ char** getCommand(char *userInput) {
   }
 
   int len = strlen(userInput);
-  char token[] = " \n\t()<>|&;";
+  char token[] = " \n\t";
 
   char *item = strtok(userInput, token);
   int i = 0;
@@ -56,6 +56,43 @@ char* getWorkingDirectory(){
   size_t buffLim = DIR_BUFF;
   char* directoryBuffer = (char*) malloc(sizeof(char) * DIR_BUFF);
   return getcwd(directoryBuffer, buffLim);
+}
+
+char getLastNonWhitespaceCharacter(char* str){
+  char whitespace[4] = {' ', '\t', '\n', '\0'};
+  int len = strlen(str);
+  int i = len-2;
+  for (; i >= 0; i--) {
+    int found = 0;
+    for (int j = 0; j < 3; j++) {
+      if (str[i] == whitespace[j]){
+        break;
+      }else{
+        found = 1;
+      }
+    }
+    if (found == 1){
+      return str[i];
+    }
+  }
+  return -1;
+}
+
+char* getOutputFile(char** str){
+  int i = 0;
+  int lastI = 0;
+  while (str[i] != NULL)  {
+    if (strcmp(str[i], (char*) ">") == 0){
+      lastI = i;
+    }else if (strcmp(str[i], (char*) ">>") == 0){
+      lastI = i;
+    }
+    i++;
+  }
+  if (str[lastI + 1] != NULL){
+    return str[lastI + 1];
+  }
+  return (char*)"";
 }
 
 // int main(){
