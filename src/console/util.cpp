@@ -27,7 +27,7 @@ char** getCommand(char* userInput) {
   }
 
   int len = strlen(userInput);
-  char token[] = " \n\t\r\r\n";
+  char token[] = " \n\t";
 
   char *item = strtok(userInput, token);
   int i = 0;
@@ -135,12 +135,9 @@ char** getArgsWithoutBackgroundOp(char** args) {
   while (args[i] != NULL && strcmp(args[i], (char*) "&") != 0) {
     i++;
   }
-  char** outp = (char**) malloc(512 * sizeof(char));
-  int j = 0;
-  for (; j < i; j++) {
-    outp[j] = args[j];
-  }
-  return outp;
+  args[i] = NULL;
+
+  return args;
 }
 
 char** getArgsWithoutRedirectionOps(char** args) {
@@ -148,12 +145,9 @@ char** getArgsWithoutRedirectionOps(char** args) {
   while (args[i] != NULL && strcmp(args[i], appendOp) != 0 && strcmp(args[i], truncOp) != 0) {
     i++;
   }
-  char** outp = (char**) malloc(512 * sizeof(char));
-  int j = 0;
-  for (; j < i; j++) {
-    outp[j] = args[j];
-  }
-  return outp;
+  args[i] = NULL;
+
+  return args;
 }
 
 char** getArgsWithoutPipeOp(char** args) {
@@ -161,12 +155,9 @@ char** getArgsWithoutPipeOp(char** args) {
   while (args[i] != NULL && strcmp(args[i], (char*) "|") != 0) {
     i++;
   }
-  char** outp = (char**) malloc(512 * sizeof(char));
-  int j = 0;
-  for (; j < i; j++) {
-    outp[j] = args[j];
-  }
-  return outp;
+  args[i] = NULL;
+
+  return args;
 }
 
 char* getLastItemInStrArr(char** args){
