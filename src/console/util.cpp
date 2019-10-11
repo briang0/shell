@@ -10,11 +10,17 @@ using namespace std;
 #define DIR_BUFF 512
 #define OUT_BUFF 512
 
-char** getCommand(char *userInput) {
+//Converts a command string to a parameter array delimited by whitespace.
+//Params: char* userInput - The input string from the user or file
+//Return: An array of (string) parameters
+char** getCommand(char* userInput) {
   char** outputBuffer = (char**) malloc(sizeof(char) * OUT_BUFF);
-  if (strchr(userInput, ' ') == NULL) {
+  //If there is no whitespace, it is just a single command with no args.
+  if (strchr(userInput, ' ') == NULL && strchr(userInput, '\t') == NULL
+        && strchr(userInput, '\n') == NULL) {
     outputBuffer[0] = userInput;
     outputBuffer[1] = NULL;
+    return outputBuffer;
   }
 
   int len = strlen(userInput);
@@ -22,6 +28,7 @@ char** getCommand(char *userInput) {
 
   char *item = strtok(userInput, token);
   int i = 0;
+  //find every string delimited by whitespace
   while (item != NULL) {
     outputBuffer[i] = item;
     item = strtok(NULL, token);
@@ -30,8 +37,12 @@ char** getCommand(char *userInput) {
   return outputBuffer;
 }
 
+//Builds a queue of commands based on a string delimited by semicolons
+//Params: char* userInput - a string corresponding to the user's input
+//Return: A queue<char**> containing all commands
 queue<char**> setCommandQueue(char* userInput){
   queue<char**> commandQueue;
+  //If there is only one command, return a queue containing just that command
   if (strchr(userInput, ';') == NULL) {
     char** command = getCommand(userInput);
     commandQueue.push(command);
@@ -43,6 +54,7 @@ queue<char**> setCommandQueue(char* userInput){
   char* nextToken = NULL;
 
   char *item = strtok_r(userInput, token, &nextToken);
+  //fill the queue
   while (item != NULL) {
     char** nextCommand = getCommand(item);
     commandQueue.push(nextCommand);
@@ -51,18 +63,26 @@ queue<char**> setCommandQueue(char* userInput){
   return commandQueue;
 }
 
+//Retrieves the working directory as a string
+//Return: a char* containing the current working directory.
 char* getWorkingDirectory(){
   size_t buffLim = DIR_BUFF;
   char* directoryBuffer = (char*) malloc(sizeof(char) * DIR_BUFF);
   return getcwd(directoryBuffer, buffLim);
 }
 
+//Checks what the last non-whitespace character in a string is
+//Params: char* str - the string to check
+//Return: char - The last non-whitespace character; -1 if there are no
+//        non-whitespace characters
 char getLastNonWhitespaceCharacter(char* str){
   char whitespace[4] = {' ', '\t', '\n', '\0'};
   int len = strlen(str);
   int i = len-2;
+  //iterate from the last chatacter to the first
   for (; i >= 0; i--) {
     int found = 0;
+    //compare the ith character to all tokens
     for (int j = 0; j < 3; j++) {
       if (str[i] == whitespace[j]){
         break;
@@ -70,13 +90,16 @@ char getLastNonWhitespaceCharacter(char* str){
         found = 1;
       }
     }
-    if (found == 1){
+    if (found){
       return str[i];
     }
   }
   return -1;
 }
 
+//Obtain the output file a command that redirects output
+//Params: char** str - command with its parameters
+//Return: A char* containing the outputfile relative directory
 char* getOutputFile(char** str){
   int i = 0;
   int lastI = 0;
