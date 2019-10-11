@@ -10,6 +10,9 @@ using namespace std;
 #define DIR_BUFF 512
 #define OUT_BUFF 512
 
+char* appendOp = (char*) ">>";
+char* truncOp = (char*) ">";
+
 //Converts a command string to a parameter array delimited by whitespace.
 //Params: char* userInput - The input string from the user or file
 //Return: An array of (string) parameters
@@ -100,19 +103,57 @@ char getLastNonWhitespaceCharacter(char* str){
 //Obtain the output file a command that redirects output
 //Params: char** str - command with its parameters
 //Return: A char* containing the outputfile relative directory
-char* getOutputFile(char** str){
+char** getRedirectionData(char** str){
   int i = 0;
-  int lastI = 0;
+  int lastI = -1;
+  int redirectType = -1;
   while (str[i] != NULL)  {
-    if (strcmp(str[i], (char*) ">") == 0){
+    if (strcmp(str[i], truncOp) == 0){
+      redirectType = 0;
       lastI = i;
-    }else if (strcmp(str[i], (char*) ">>") == 0){
+    }else if (strcmp(str[i], appendOp) == 0){
+      redirectType = 1;
       lastI = i;
     }
     i++;
   }
-  if (str[lastI + 1] != NULL){
-    return str[lastI + 1];
+  if (lastI != -1){
+    char** out = (char**) malloc(sizeof(str[lastI + 1]) + 2 * sizeof(char));
+    out[0] = str[lastI + 1];
+    out[1] = redirectType ? appendOp : truncOp;
+    return out;
+  }else {
+    char** out = (char**) malloc(2 * sizeof(char));
+    out[0] = (char*) "";
+    out[1] = (char*) "";
+    return out;
   }
-  return (char*)"";
+}
+
+char** getArgsWithoutBackgroundOp(char** args) {
+  int mem = 0;
+  int i = 0;
+  while (args[i] != NULL && strcmp(args[i], (char*) "&") != 0) {
+    mem += sizeof(args[i]);
+    i++;
+  }
+  char** outp = (char**) malloc(mem);
+  for (int j = 0; j < i; j++) {
+    outp[j] = args[j];
+  }
+  return outp;
+}
+
+char** getArgsWithoutRedirectionOps(char** args) {
+  int mem = 0;
+  int i = 0;
+  while (args[i] != NULL && strcmp(args[i], appendOp) != 0 && strcmp(args[i], truncOp) != 0) {
+    mem += sizeof(args[i]);
+    i++;
+  }
+  char** outp = (char**) malloc(mem);
+  for (int j = 0; j < i; j++) {
+    outp[j] = args[j];
+  }
+  return outp;
 }

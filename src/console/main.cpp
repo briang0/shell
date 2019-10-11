@@ -66,6 +66,7 @@ int main(int argc, char **argv, char **envp){
   while(1) {
     inputBuffer = (char*) malloc(sizeof(char) * IN_BUFF);
     cout << "[Console:" << getWorkingDirectory() << "]$ " << std::flush;
+    //get user input unless it's reading from a file
     if (!read)
       getline(&inputBuffer, &bufsize, stdin);
 
@@ -76,7 +77,10 @@ int main(int argc, char **argv, char **envp){
       char** args = commandQueue.front();
       commandQueue.pop();
       int bg = checkForBackgroundCommand(inputBuffer);
-      int execStatus = executeCommand(args, sig, bg);
+      char** redirect = getRedirectionData(args);
+      char** argsNoBg = getArgsWithoutBackgroundOp(args);
+      char** argsNoRedir = getArgsWithoutRedirectionOps(argsNoBg);
+      int execStatus = executeCommand(argsNoRedir, sig, bg, redirect);
 
       //call the appropriate function if the command isn't through execvp
       if (execStatus == 0){
@@ -88,18 +92,19 @@ int main(int argc, char **argv, char **envp){
         }else if (sig == 3){
           changeDirectory(args[1]);
         }else if (sig == 4){
-          printEnviron();
+          printEnviron(redirect, bg);
         }else if (sig == 5){
-          stopItGetSomeHelp();
+          stopItGetSomeHelp(redirect);
         }else if (sig == 6){
           setConsoleState(1);
         }
+        free(argsNoRedir);
       }else{
         cout << "Unknown command or bad arguments in: " << inputBuffer << "\n" << std::flush;
       }
       consoleState = getConsoleState();
       if (consoleState == 1){
-        cout << "Console is paused. Press enter to continue.\n";
+        cout << "ZA WARUDO!\n";
         cin.ignore();
         setConsoleState(0);
       }

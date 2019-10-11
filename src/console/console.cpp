@@ -4,29 +4,48 @@
 #include<sys/types.h>
 #include<sys/wait.h>
 #include<string.h>
+#include <fcntl.h>
 using namespace std;
 
 int consoleState = 0;
 
 int getSignal(char**);
 
+int getRedirection(char** redirect){
+  int fd;
+  if (strcmp(redirect[1], (char*) ">>") == 0) {
+    fd = open(redirect[0], O_WRONLY|O_APPEND|O_CREAT, 0644);
+  }else if (strcmp(redirect[1], (char*) ">") == 0) {
+    fd = open(redirect[0], O_WRONLY|O_TRUNC|O_CREAT, 0644);
+  }else{
+    fd = -1;
+  }
+  return fd;
+}
+
 //Executes an execvp command
 //Params: char** args - The command and arguments to be executed
 //        int& signal - The signal for the main function
 //        int bg - Signal to determine if the process runs in the background
 //Returns: int exitCode - The status of the execution
-int executeCommand(char** args, int &signal, int bg){
+int executeCommand(char** args, int &signal, int bg, char** redirect){
   int exitCode = 0;
   int status, wpid;
   signal = getSignal(args);
+
   //check if execvp is needed
   if (signal != 0 && signal != 5){
     return 0;
   }
+  int fd = getRedirection(redirect);
   //create a child process for execvp
   int pid = fork();
   if (pid == 0){
     //run the command
+    if (fd != -1){
+      dup2(fd, 1);
+      close(fd);
+    }
     signal = (int) execvp(args[0], args);
     exit(0);
   }else if (bg == 0){
@@ -39,19 +58,35 @@ int executeCommand(char** args, int &signal, int bg){
 }
 
 //Prints environment variables
-void printEnviron(){
+void printEnviron(char** redirect, int bg) {
   int i = 0;
-  while (environ[i] != NULL) {
-    cout << environ[i] << "\n" << std::flush;
-    i++;
+  int status, wpid;
+  int fd = getRedirection(redirect);
+  int pid = fork();
+  if (pid == 0){
+    if (fd != -1) {
+      dup2(fd, 1);
+      close(fd);
+    }
+    while (environ[i] != NULL) {
+      cout << environ[i] << "\n" << std::flush;
+      i++;
+    }
+    exit(0);
+  }else if (bg == 0){
+    do {
+      wpid = waitpid(pid, &status, WUNTRACED);
+    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
   }
+  if (fd != -1)
+    close(fd);
 }
 
 //Prints help for the user
-void stopItGetSomeHelp(){
+void stopItGetSomeHelp(char** redirect){
   int signal = 0;
   char* command[3] = {(char*) "more", (char*) "help.txt", NULL};
-  executeCommand(command, signal, 0);
+  executeCommand(command, signal, 0, redirect);
 }
 
 //Checks if the entered command is a non-execvp compatible command.
