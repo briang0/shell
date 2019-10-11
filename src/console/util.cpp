@@ -27,7 +27,7 @@ char** getCommand(char* userInput) {
   }
 
   int len = strlen(userInput);
-  char token[] = " \n\t";
+  char token[] = " \n\t\r\r\n";
 
   char *item = strtok(userInput, token);
   int i = 0;
