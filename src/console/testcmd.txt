@@ -1,0 +1,4 @@
+pwd
+cal
+ps -aux
+help

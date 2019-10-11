@@ -7,12 +7,11 @@
 #include <queue>
 using namespace std;
 
-#define DIR_BUFF 256
-#define IN_BUFF 256
-#define PARAM_BUFF 15
+#define DIR_BUFF 512
+#define OUT_BUFF 512
 
 char** getCommand(char *userInput) {
-  char** outputBuffer = (char**) malloc(sizeof(char) * 256);
+  char** outputBuffer = (char**) malloc(sizeof(char) * OUT_BUFF);
   if (strchr(userInput, ' ') == NULL) {
     outputBuffer[0] = userInput;
     outputBuffer[1] = NULL;
@@ -94,11 +93,3 @@ char* getOutputFile(char** str){
   }
   return (char*)"";
 }
-
-// int main(){
-//   size_t bufsize = 256;
-//   char *input = (char*) malloc(sizeof(char) * 256);
-//   char *outputBuffer[100];
-//   getCommandArgs(input, outputBuffer);
-//   return 0;
-// }

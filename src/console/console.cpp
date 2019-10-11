@@ -11,13 +11,13 @@ int consoleState = 0;
 int getSignal(char**);
 
 int executeCommand(char** args, int &signal, int bg){
-  int pid = fork();
   int exitCode = 0;
   int status, wpid;
   signal = getSignal(args);
-  if (signal == 0){
+  if (signal != 0 && signal != 5){
     return 0;
   }
+  int pid = fork();
   if (pid == 0){
     signal = (int) execvp(args[0], args);
     exit(0);
@@ -62,7 +62,7 @@ int getSignal(char** args){
 }
 
 void clear(){
-  system("clear");
+  cout << string(100, '\n');
 }
 
 void changeDirectory(char* path){
