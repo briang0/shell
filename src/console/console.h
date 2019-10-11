@@ -5,3 +5,4 @@ void clear();
 void changeDirectory(char*);
 int getConsoleState();
 void setConsoleState(int);
+int executeMorePipe(char**, int&, int, char**);

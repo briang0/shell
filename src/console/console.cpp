@@ -29,6 +29,9 @@ int getRedirection(char** redirect){
 //        int bg - Signal to determine if the process runs in the background
 //Returns: int exitCode - The status of the execution
 int executeCommand(char** args, int &signal, int bg, char** redirect){
+  if (args[0] == NULL){
+    return 0;
+  }
   int exitCode = 0;
   int status, wpid;
   signal = getSignal(args);
@@ -57,6 +60,19 @@ int executeCommand(char** args, int &signal, int bg, char** redirect){
   return exitCode;
 }
 
+int executeMorePipe(char** prePipeArgs, int &signal, int bg, char** redirect){
+  char* tempOutput = (char*)"TempRedirection.temp";
+  int i = 0;
+  while (prePipeArgs[i] != NULL){
+    cout << prePipeArgs[i] << "\n";
+    i++;
+  }
+  char* tempRedirect[3] = {tempOutput, (char*) ">", NULL};
+  executeCommand(prePipeArgs, signal, bg, tempRedirect);
+  char* moreCmd[3] = {(char*) "more", tempOutput, NULL};
+  executeCommand(moreCmd, signal, bg, redirect);
+}
+
 //Prints environment variables
 void printEnviron(char** redirect, int bg) {
   int i = 0;
@@ -69,7 +85,7 @@ void printEnviron(char** redirect, int bg) {
       close(fd);
     }
     while (environ[i] != NULL) {
-      cout << environ[i] << "\n" << std::flush;
+      cout << environ[i] << "\n";
       i++;
     }
     exit(0);
@@ -78,8 +94,6 @@ void printEnviron(char** redirect, int bg) {
       wpid = waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
   }
-  if (fd != -1)
-    close(fd);
 }
 
 //Prints help for the user

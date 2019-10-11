@@ -131,29 +131,51 @@ char** getRedirectionData(char** str){
 }
 
 char** getArgsWithoutBackgroundOp(char** args) {
-  int mem = 0;
   int i = 0;
   while (args[i] != NULL && strcmp(args[i], (char*) "&") != 0) {
-    mem += sizeof(args[i]);
     i++;
   }
-  char** outp = (char**) malloc(mem);
-  for (int j = 0; j < i; j++) {
+  char** outp = (char**) malloc(512 * sizeof(char));
+  int j = 0;
+  for (; j < i; j++) {
     outp[j] = args[j];
   }
   return outp;
 }
 
 char** getArgsWithoutRedirectionOps(char** args) {
-  int mem = 0;
   int i = 0;
   while (args[i] != NULL && strcmp(args[i], appendOp) != 0 && strcmp(args[i], truncOp) != 0) {
-    mem += sizeof(args[i]);
     i++;
   }
-  char** outp = (char**) malloc(mem);
-  for (int j = 0; j < i; j++) {
+  char** outp = (char**) malloc(512 * sizeof(char));
+  int j = 0;
+  for (; j < i; j++) {
     outp[j] = args[j];
   }
   return outp;
+}
+
+char** getArgsWithoutPipeOp(char** args) {
+  int i = 0;
+  while (args[i] != NULL && strcmp(args[i], (char*) "|") != 0) {
+    i++;
+  }
+  char** outp = (char**) malloc(512 * sizeof(char));
+  int j = 0;
+  for (; j < i; j++) {
+    outp[j] = args[j];
+  }
+  return outp;
+}
+
+char* getLastItemInStrArr(char** args){
+  int i = 0;
+  while (args[i] != NULL) {
+    i++;
+  }
+  if (i == 0){
+    return (char*)"";
+  }
+  return args[--i];
 }

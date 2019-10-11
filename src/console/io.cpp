@@ -32,7 +32,7 @@ queue<char**> parseCommandsIntoQueueFromFile(char* path) {
     //Add each line from the file into the queue
     while(getline(input, line)){
       //Remove the last character because it's a bad influence on society
-      string copy = line.substr(0, line.size()-1);
+      string copy = line.substr(0, line.size() - 1);
       char *cstr = new char[copy.length()];
       strcpy(cstr, copy.c_str());
       char** command = getCommand(cstr);

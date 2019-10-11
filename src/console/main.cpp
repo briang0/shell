@@ -1,8 +1,5 @@
 #include <iostream>
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include "util.h"
 #include "console.h"
 #include "io.h"
@@ -80,7 +77,14 @@ int main(int argc, char **argv, char **envp){
       char** redirect = getRedirectionData(args);
       char** argsNoBg = getArgsWithoutBackgroundOp(args);
       char** argsNoRedir = getArgsWithoutRedirectionOps(argsNoBg);
-      int execStatus = executeCommand(argsNoRedir, sig, bg, redirect);
+      int isMore = (strcmp(getLastItemInStrArr(args), (char*) "more") == 0);
+      int execStatus = 0;
+      if (!isMore) {
+        int execStatus = executeCommand(argsNoRedir, sig, bg, redirect);
+      } else {
+        char** argsNoPipe = getArgsWithoutPipeOp(argsNoRedir);
+        int execStatus = executeMorePipe(argsNoPipe, sig, bg, redirect);
+      }
 
       //call the appropriate function if the command isn't through execvp
       if (execStatus == 0){
@@ -98,18 +102,16 @@ int main(int argc, char **argv, char **envp){
         }else if (sig == 6){
           setConsoleState(1);
         }
-        free(argsNoRedir);
       }else{
         cout << "Unknown command or bad arguments in: " << inputBuffer << "\n" << std::flush;
       }
       consoleState = getConsoleState();
       if (consoleState == 1){
-        cout << "ZA WARUDO!\n";
+        cout << "Shell paused. Press enter to continue.\n";
         cin.ignore();
         setConsoleState(0);
       }
     }
-    free(inputBuffer);
   }
   return 0;
 }
