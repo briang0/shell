@@ -1,3 +1,7 @@
+//  Brian Guidarini
+//  October 10th, 2019
+//  The console itself. This file contains all functions related to the functionality
+//  of the shell.
 #include<iostream>
 #include<stdio.h>
 #include<unistd.h>
@@ -72,7 +76,7 @@ int executeCommand(char** args, int &signal, int bg, char** redirect){
 //        int bg - Signal to decide if the process runs in the background
 //        char** redirect - Redirection data
 //
-int executeMorePipe(char** prePipeArgs, int &signal, int bg, char** redirect){
+void executeMorePipe(char** prePipeArgs, int &signal, int bg, char** redirect){
   char* tempOutput = (char*)"TempRedirection.temp";
   int i = 0;
   while (prePipeArgs[i] != NULL) {

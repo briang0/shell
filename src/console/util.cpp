@@ -1,3 +1,7 @@
+//  Brian Guidarini
+//  October 10th, 2019
+//  This file contains functions for general utilities. Primarily string / string
+//  array manipulation
 #include <iostream>
 #include <string.h>
 #include <stdio.h>

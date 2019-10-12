@@ -1,3 +1,6 @@
+//  Brian Guidarini
+//  October 10th, 2019
+//  This file is responsible for hanndling external I/O events
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>

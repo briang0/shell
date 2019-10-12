@@ -1,3 +1,6 @@
+//  Brian Guidarini
+//  October 10th, 2019
+//  Main file to delegate the shell's input.
 #include <iostream>
 #include <stdio.h>
 #include "util.h"
