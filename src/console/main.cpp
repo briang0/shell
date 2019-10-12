@@ -24,10 +24,10 @@ int checkForFileInput(int argc) {
 //in the background
 //Params: char* inputBuffer: The command entered by the user
 //return: 1 if the command should run in the backgrond, 0 otherwise.
-int checkForBackgroundCommand(char* inputBuffer) {
-  char lastChar = getLastNonWhitespaceCharacter(inputBuffer);
+int checkForBackgroundCommand(char** args) {
+  char* str = getLastItemInStrArr(args);
   int bg = 0;
-  if (lastChar == '&') bg = 1;
+  if (strcmp(str, (char*) "&") == 0) bg = 1;
   return bg;
 }
 
@@ -68,17 +68,18 @@ int main(int argc, char **argv, char **envp){
       getline(&inputBuffer, &bufsize, stdin);
 
     queue<char**> commandQueue = getCommandQueue(read, argv[1], inputBuffer);
-    read = 0;
     //run through the command queue until all commands have executed
     while (!commandQueue.empty()){
       char** args = commandQueue.front();
       commandQueue.pop();
-      int bg = checkForBackgroundCommand(inputBuffer);
+      //setup execution modifiers
+      int bg = checkForBackgroundCommand(args);
       char** redirect = getRedirectionData(args);
       char** argsNoBg = getArgsWithoutBackgroundOp(args);
       char** argsNoRedir = getArgsWithoutRedirectionOps(argsNoBg);
       int isMore = (strcmp(getLastItemInStrArr(args), (char*) "more") == 0);
       int execStatus = 0;
+      //execute command based on if it is more or not
       if (!isMore) {
         int execStatus = executeCommand(argsNoRedir, sig, bg, redirect);
       } else {
@@ -111,6 +112,9 @@ int main(int argc, char **argv, char **envp){
         cin.ignore();
         setConsoleState(0);
       }
+    }
+    if (read) {
+      break;
     }
   }
   return 0;

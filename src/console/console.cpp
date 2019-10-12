@@ -7,10 +7,15 @@
 #include <fcntl.h>
 using namespace std;
 
+//0 if the console is running, 1 if it is paused
 int consoleState = 0;
 
 int getSignal(char**);
 
+//Redirects stdout
+//Params:   char** redirect - The redirection data containing the output file in
+//          in the first index and the operator in the second.
+//Returns:  int fd - The file stream on success and -1 on failure.
 int getRedirection(char** redirect){
   int fd;
   if (strcmp(redirect[1], (char*) ">>") == 0) {
@@ -50,6 +55,7 @@ int executeCommand(char** args, int &signal, int bg, char** redirect){
       close(fd);
     }
     signal = (int) execvp(args[0], args);
+    cout << "Unknown command or bad syntax\n";
     exit(0);
   }else if (bg == 0){
     //wait for the child to finish unless it's a background process
@@ -60,40 +66,36 @@ int executeCommand(char** args, int &signal, int bg, char** redirect){
   return exitCode;
 }
 
+//Executes a more command with piped input.
+//Params: char** prePipeArgs - All arguments before the | operator
+//        int &signal - The execution signal
+//        int bg - Signal to decide if the process runs in the background
+//        char** redirect - Redirection data
+//
 int executeMorePipe(char** prePipeArgs, int &signal, int bg, char** redirect){
   char* tempOutput = (char*)"TempRedirection.temp";
   int i = 0;
-  while (prePipeArgs[i] != NULL){
+  while (prePipeArgs[i] != NULL) {
     cout << prePipeArgs[i] << "\n";
     i++;
   }
-  char* tempRedirect[3] = {tempOutput, (char*) ">", NULL};
-  executeCommand(prePipeArgs, signal, bg, tempRedirect);
-  char* moreCmd[3] = {(char*) "more", tempOutput, NULL};
-  executeCommand(moreCmd, signal, bg, redirect);
+  int isHelp = strstr(prePipeArgs[0], (char*) "help") != NULL;
+  if (isHelp) {
+    char* moreCmd[3] = {(char*) "more", (char*) "help.txt", NULL};
+    executeCommand(moreCmd, signal, bg, redirect);
+  } else {
+    char* tempRedirect[3] = {tempOutput, (char*) ">", NULL};
+    executeCommand(prePipeArgs, signal, bg, tempRedirect);
+    char* moreCmd[3] = {(char*) "more", tempOutput, NULL};
+    executeCommand(moreCmd, signal, bg, redirect);
+  }
 }
 
 //Prints environment variables
 void printEnviron(char** redirect, int bg) {
-  int i = 0;
-  int status, wpid;
-  int fd = getRedirection(redirect);
-  int pid = fork();
-  if (pid == 0){
-    if (fd != -1) {
-      dup2(fd, 1);
-      close(fd);
-    }
-    while (environ[i] != NULL) {
-      cout << environ[i] << "\n";
-      i++;
-    }
-    exit(0);
-  }else if (bg == 0){
-    do {
-      wpid = waitpid(pid, &status, WUNTRACED);
-    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-  }
+  int signal = 0;
+  char* command[2] = {(char*) "env", NULL};
+  executeCommand(command, signal, 0, redirect);
 }
 
 //Prints help for the user
@@ -127,13 +129,23 @@ int getSignal(char** args){
 
 //Clears the screen
 void clear(){
-  cout << string(100, '\n');
+  int signal = 0;
+  char* redirect[3] = {(char*) "", (char*) "", NULL};
+  char* command[2] = {(char*) "clear", NULL};
+  executeCommand(command, signal, 0, redirect);
 }
 
 //Changes the current working directory
 //Params: char* path - the path of the directory being changed into
 void changeDirectory(char* path){
   int success = chdir(path);
+  int signal = 0;
+  char* argsToCallPwd[2] = {(char*)"pwd", NULL};
+  char* dummyRedirect[3] = {(char*)"", (char*)"", NULL};
+  if (path == NULL || strcmp(path, (char*)"") == 0){
+    executeCommand(argsToCallPwd, signal, 0, dummyRedirect);
+    return;
+  }
   if (success == -1){
     cout << "Directory " << path << " Does not exist in current path\n";
   }

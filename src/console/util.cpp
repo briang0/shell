@@ -12,6 +12,7 @@ using namespace std;
 
 char* appendOp = (char*) ">>";
 char* truncOp = (char*) ">";
+char* emptyStr = (char*) "";
 
 //Converts a command string to a parameter array delimited by whitespace.
 //Params: char* userInput - The input string from the user or file
@@ -31,8 +32,7 @@ char** getCommand(char* userInput) {
 
   char *item = strtok(userInput, token);
   int i = 0;
-  //find every string delimited by whitespace
-  while (item != NULL) {
+  while (item != NULL) {//find every string delimited by whitespace
     outputBuffer[i] = item;
     item = strtok(NULL, token);
     i++;
@@ -58,7 +58,7 @@ queue<char**> setCommandQueue(char* userInput){
 
   char *item = strtok_r(userInput, token, &nextToken);
   //fill the queue
-  while (item != NULL) {
+  while (item != NULL) {//add to the queue for each command
     char** nextCommand = getCommand(item);
     commandQueue.push(nextCommand);
     item = strtok_r(NULL, token, &nextToken);
@@ -81,20 +81,16 @@ char* getWorkingDirectory(){
 char getLastNonWhitespaceCharacter(char* str){
   char whitespace[4] = {' ', '\t', '\n', '\0'};
   int len = strlen(str);
-  int i = len-2;
+  int i = len-1;
   //iterate from the last chatacter to the first
   for (; i >= 0; i--) {
-    int found = 0;
-    //compare the ith character to all tokens
-    for (int j = 0; j < 3; j++) {
+    for (int j =  0; j < 4; j++) {//compare the ith character to all tokens
       if (str[i] == whitespace[j]){
         break;
-      }else{
-        found = 1;
       }
-    }
-    if (found){
-      return str[i];
+      if (j == 3){
+        return str[i];
+      }
     }
   }
   return -1;
@@ -107,7 +103,8 @@ char** getRedirectionData(char** str){
   int i = 0;
   int lastI = -1;
   int redirectType = -1;
-  while (str[i] != NULL)  {
+  while (str[i] != NULL)  { // iterate through the string until the end
+    //check if the type of redirection
     if (strcmp(str[i], truncOp) == 0){
       redirectType = 0;
       lastI = i;
@@ -117,56 +114,67 @@ char** getRedirectionData(char** str){
     }
     i++;
   }
+  //If there is redirectiom, store the file and the operator
   if (lastI != -1){
     char** out = (char**) malloc(sizeof(str[lastI + 1]) + 2 * sizeof(char));
     out[0] = str[lastI + 1];
     out[1] = redirectType ? appendOp : truncOp;
     return out;
-  }else {
+  }else {//if there is no redirection, return two empty strings
     char** out = (char**) malloc(2 * sizeof(char));
-    out[0] = (char*) "";
-    out[1] = (char*) "";
+    out[0] = emptyStr;
+    out[1] = emptyStr;
     return out;
   }
 }
 
+//Removes "&" from an array of strings
+//Params: char** args - input array
+//Returns: A char** identical to args, except without "&"
 char** getArgsWithoutBackgroundOp(char** args) {
   int i = 0;
   while (args[i] != NULL && strcmp(args[i], (char*) "&") != 0) {
-    i++;
+    i++;//increment i until the end of the string or one of the operators is found
   }
   args[i] = NULL;
 
   return args;
 }
 
+//Removes >> and > from an array of strings
+//Params: char** args - input array of strings
+//Returns: A char** identical to args, but without >> and >
 char** getArgsWithoutRedirectionOps(char** args) {
   int i = 0;
   while (args[i] != NULL && strcmp(args[i], appendOp) != 0 && strcmp(args[i], truncOp) != 0) {
-    i++;
+    i++;//increment i until the end of the string or one of the operators is found
   }
   args[i] = NULL;
-
   return args;
 }
 
+//Removes | from an array of strings.
+//Params: char** args - Input array of strings
+//Returns: A char** identical to args, but without |
 char** getArgsWithoutPipeOp(char** args) {
   int i = 0;
   while (args[i] != NULL && strcmp(args[i], (char*) "|") != 0) {
-    i++;
+    i++;//increment i until the end of the string or one of the operators is found
   }
   args[i] = NULL;
-
   return args;
 }
 
+//Gets the last item in a string array
+//Params: char** args - argument list
+//Returns: char* last element in array
 char* getLastItemInStrArr(char** args){
   int i = 0;
   while (args[i] != NULL) {
     i++;
   }
   if (i == 0){
-    return (char*)"";
+    return emptyStr;
   }
   return args[--i];
 }
