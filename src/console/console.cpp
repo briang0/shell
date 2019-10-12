@@ -26,6 +26,8 @@ int getRedirection(char** redirect){
     fd = open(redirect[0], O_WRONLY|O_APPEND|O_CREAT, 0644);
   }else if (strcmp(redirect[1], (char*) ">") == 0) {
     fd = open(redirect[0], O_WRONLY|O_TRUNC|O_CREAT, 0644);
+  }else if (strcmp(redirect[1], (char*) "<") == 0){
+    fd = open(redirect[0], O_RDONLY);
   }else{
     fd = -1;
   }
@@ -52,10 +54,11 @@ int executeCommand(char** args, int &signal, int bg, char** redirect){
   int fd = getRedirection(redirect);
   //create a child process for execvp
   int pid = fork();
+  int d2 = strcmp(redirect[1], (char*) "<") == 0 ? 0 : 1;
   if (pid == 0){
     //run the command
     if (fd != -1){
-      dup2(fd, 1);
+      dup2(fd, d2);
       close(fd);
     }
     signal = (int) execvp(args[0], args);
@@ -67,6 +70,7 @@ int executeCommand(char** args, int &signal, int bg, char** redirect){
       wpid = waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
   }
+  close(fd);
   return exitCode;
 }
 

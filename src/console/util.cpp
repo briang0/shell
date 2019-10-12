@@ -16,6 +16,7 @@ using namespace std;
 
 char* appendOp = (char*) ">>";
 char* truncOp = (char*) ">";
+char* inputOp = (char*) "<";
 char* emptyStr = (char*) "";
 
 //Converts a command string to a parameter array delimited by whitespace.
@@ -107,13 +108,20 @@ char** getRedirectionData(char** str){
   int i = 0;
   int lastI = -1;
   int redirectType = -1;
+  char* actualOperator = (char*)"";
   while (str[i] != NULL)  { // iterate through the string until the end
     //check if the type of redirection
     if (strcmp(str[i], truncOp) == 0){
-      redirectType = 0;
+      actualOperator = (char*) malloc(sizeof(truncOp));
+      strcpy(actualOperator, truncOp);
       lastI = i;
     }else if (strcmp(str[i], appendOp) == 0){
-      redirectType = 1;
+      actualOperator = (char*) malloc(sizeof(appendOp));
+      strcpy(actualOperator, appendOp);
+      lastI = i;
+    }else if (strcmp(str[i], inputOp) == 0) {
+      actualOperator = (char*) malloc(sizeof(inputOp));
+      strcpy(actualOperator, inputOp);
       lastI = i;
     }
     i++;
@@ -122,7 +130,7 @@ char** getRedirectionData(char** str){
   if (lastI != -1){
     char** out = (char**) malloc(sizeof(str[lastI + 1]) + 2 * sizeof(char));
     out[0] = str[lastI + 1];
-    out[1] = redirectType ? appendOp : truncOp;
+    out[1] = actualOperator;
     return out;
   }else {//if there is no redirection, return two empty strings
     char** out = (char**) malloc(2 * sizeof(char));
@@ -150,7 +158,8 @@ char** getArgsWithoutBackgroundOp(char** args) {
 //Returns: A char** identical to args, but without >> and >
 char** getArgsWithoutRedirectionOps(char** args) {
   int i = 0;
-  while (args[i] != NULL && strcmp(args[i], appendOp) != 0 && strcmp(args[i], truncOp) != 0) {
+  while (args[i] != NULL && strcmp(args[i], appendOp) != 0 && strcmp(args[i], truncOp) != 0
+                    && strcmp(args[i], inputOp) != 0) {
     i++;//increment i until the end of the string or one of the operators is found
   }
   args[i] = NULL;
